@@ -31,7 +31,9 @@ namespace LC
             string? extensionFilter = null;
             List<string> targetDirs = new();
 
-            // Parse args
+            /*
+             * Parse command line arguments
+             */
             for (int i = 0; i < args.Length; i++)
             {
                 string arg = args[i];
@@ -82,8 +84,13 @@ namespace LC
             }
 
             if (targetDirs.Count == 0)
+            {
                 targetDirs.Add(Directory.GetCurrentDirectory());
+            }
 
+            /*
+             * handle each target directory
+             */
             foreach (string dir in targetDirs)
             {
                 if (!Directory.Exists(dir))
@@ -114,8 +121,14 @@ namespace LC
                     }
                 }
             }
-        }
 
+        } /* Main */
+
+        /*
+         * PrintHelp
+         * 
+         * Prints the help message for the lc command
+         */
         static void PrintHelp()
         {
             Console.WriteLine(
@@ -128,8 +141,15 @@ namespace LC
        -f         : show files only
        -r         : recursive mode
        -R         : show read-only files separately");
-        }
+        } /* PrintHelp */
 
+        /*
+         * GetEntries
+         * 
+         * Retrieves directories and files in the specified root directory.
+         * If recurse is true, it searches all subdirectories.
+         * If extFilter is provided, it filters files by the specified extension.
+         */
         static (List<string> dirs, List<string> files, List<string> readOnlyFiles) GetEntries(string root, bool recurse, string? extFilter)
         {
             var allDirs = new List<string>();
@@ -163,8 +183,15 @@ namespace LC
             readOnlyFiles.Sort(StringComparer.OrdinalIgnoreCase);
 
             return (allDirs, allFiles, readOnlyFiles);
-        }
 
+        } /* GetEntries */
+
+        /*
+         * PrintInColumns
+         * 
+         * Prints a list of items in columns, with padding and color coding based on type.
+         * If the list is empty, it prints "(none)".
+         */
         static void PrintInColumns(List<string> items, string basePath, int columnPadding = 4, int maxColumns = 4)
         {
             if (items.Count == 0)
@@ -189,8 +216,14 @@ namespace LC
                 }
                 Console.WriteLine();
             }
-        }
+        } /* PrintInColumns */
 
+        /*
+         * WriteColored
+         * 
+         * Writes the text to the console with color coding based on the type of item.
+         * Directories are blue, executables are green, hidden files are dimmed, and others are normal.
+         */
         static void WriteColored(string text, string name, string basePath)
         {
             string fullPath = Path.Combine(basePath, name);
@@ -208,15 +241,22 @@ namespace LC
 
             Console.Write(text);
             Console.Write("\x1b[0m");
-        }
+        } /* WriteColored */
 
+        /*
+         * EnableVirtualTerminal
+         * 
+         * Enables virtual terminal processing for the console to support ANSI escape codes.
+         * This is necessary for colored output in Windows consoles.
+         */
         static void EnableVirtualTerminal()
         {
             const int STD_OUTPUT_HANDLE = -11;
             var handle = GetStdHandle(STD_OUTPUT_HANDLE);
             GetConsoleMode(handle, out int mode);
             SetConsoleMode(handle, mode | 0x0004); // ENABLE_VIRTUAL_TERMINAL_PROCESSING
-        }
+
+        } /* EnableVirtualTerminal */
 
         [DllImport("kernel32.dll")] static extern IntPtr GetStdHandle(int nStdHandle);
         [DllImport("kernel32.dll")] static extern bool GetConsoleMode(IntPtr hConsoleHandle, out int lpMode);
